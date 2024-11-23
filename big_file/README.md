@@ -3,5 +3,4 @@
 ## 执行
 ```bash
 g++ -o big_file big_file.cpp -pthread
-./big_file search "Hello"
 ```
