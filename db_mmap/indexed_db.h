@@ -16,6 +16,7 @@ class IndexedDB : public OptimizedDB {
 private:
     IndexNode* root;
     uint64_t root_offset;  // 根节点在文件中的偏移
+    uint32_t next_key;     // 下一个可用的键值
     
 protected:
     using OptimizedDB::addr;
@@ -23,7 +24,7 @@ protected:
     using OptimizedDB::get_record;
     
 public:
-    IndexedDB(const char* filename) : OptimizedDB(filename), root(nullptr) {
+    IndexedDB(const char* filename) : OptimizedDB(filename), root(nullptr), next_key(1) {
         if (header->version == 1) {
             // 新数据库，创建索引
             create_index();
@@ -38,9 +39,8 @@ public:
     uint64_t write(const void* data, size_t size) override {
         uint64_t pos = OptimizedDB::write(data, size);
         if (pos) {
-            // 使用记录ID作为索引键
-            RecordHeader* rec = get_record(pos);
-            insert_index(rec->id, pos);
+            // 使用自增键值作为索引
+            insert_index(next_key++, pos);
         }
         return pos;
     }
@@ -80,7 +80,8 @@ private:
     // 创建索引
     void create_index() {
         // 分配根节点空间
-        root_offset = allocate_node();
+        root_offset = header->data_start;
+        header->data_start += sizeof(IndexNode);
         header->free_start = root_offset;  // 存储根节点位置
         root = get_node(root_offset);
         
@@ -95,8 +96,8 @@ private:
 
     // 分配新节点
     uint64_t allocate_node() {
-        uint64_t offset = header->data_size;
-        header->data_size += sizeof(IndexNode);
+        uint64_t offset = header->data_start;
+        header->data_start += sizeof(IndexNode);
         return offset;
     }
 
