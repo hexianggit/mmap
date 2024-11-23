@@ -33,12 +33,12 @@ protected:
 
 public:
     SimpleDB(const char* filename);
-    ~SimpleDB();
+    virtual ~SimpleDB();
 
     // 基本操作
-    uint64_t write(const void* data, size_t size);
-    bool read(uint64_t pos, void* buffer, size_t* size);
-    bool remove(uint64_t pos);
+    virtual uint64_t write(const void* data, size_t size);
+    virtual bool read(uint64_t pos, void* buffer, size_t* size);
+    virtual bool remove(uint64_t pos);
 
 protected:
     // 内部工具方法

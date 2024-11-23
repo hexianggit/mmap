@@ -43,7 +43,7 @@ public:
         start_background_flush();
     }
 
-    ~OptimizedDB() {
+    ~OptimizedDB() override {
         stop_background_flush();
         flush_all();
         clear_cache();
