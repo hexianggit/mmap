@@ -1,8 +1,10 @@
 #include <sys/mman.h>
+#include <cstdint>  // 添加这行来支持 uint32_t, uint64_t 等类型
+#include <sys/mman.h>
+#include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <string.h>
-#include <stdio.h>
+#include <cstring>
 
 // 数据库头部信息
 struct DBHeader {
