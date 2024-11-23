@@ -14,7 +14,7 @@
 class BigFileProcessor {
 private:
     static const size_t CHUNK_SIZE = 64 * 1024 * 1024;  // 64MB chunks
-    static const size_t MAX_THREADS = 8;                 // 最大线程数
+    static const size_t MAX_THREADS;                     // 最大线程数
 
     int fd;                     // 文件描述符
     void* mapped_addr;          // 映射地址
@@ -134,7 +134,9 @@ private:
     }
 };
 
-// 使用示例
+// 在类外定义静态成员变量
+const size_t BigFileProcessor::MAX_THREADS = 8;
+
 int main() {
     try {
         const char* filename = "bigfile.dat";
