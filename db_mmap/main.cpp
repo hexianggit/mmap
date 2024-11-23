@@ -1,41 +1,34 @@
-#include "optimized_db.h"
+#include "indexed_db.h"
 #include <vector>
 #include <string>
 
 int main() {
     try {
-        OptimizedDB db("test.db");
+        IndexedDB db("test.db");
 
-        // 单条写入
-        const char* data1 = "Hello, Optimized DB!";
+        // 写入测试数据
+        const char* data1 = "Record One";
+        const char* data2 = "Record Two";
+        const char* data3 = "Record Three";
+
         uint64_t pos1 = db.write(data1, strlen(data1) + 1);
+        uint64_t pos2 = db.write(data2, strlen(data2) + 1);
+        uint64_t pos3 = db.write(data3, strlen(data3) + 1);
 
-        // 批量写入
-        std::vector<std::pair<const void*, size_t>> records;
-        std::vector<std::string> strings = {
-            "Record 1",
-            "Record 2",
-            "Record 3"
-        };
-        
-        for (const auto& s : strings) {
-            records.push_back({s.c_str(), s.length() + 1});
-        }
-
-        std::vector<uint64_t> positions;
-        db.batch_write(records, positions);
-
-        // 读取测试
+        // 按ID读取
         char buffer[1024];
         size_t size;
         
-        if (db.read(pos1, buffer, &size)) {
-            printf("Read first record: %s\n", buffer);
+        if (db.read_by_id(1, buffer, &size)) {
+            printf("Read record #1: %s\n", buffer);
         }
 
-        for (uint64_t pos : positions) {
-            if (db.read(pos, buffer, &size)) {
-                printf("Read batch record: %s\n", buffer);
+        // 范围查询
+        auto results = db.range_query(1, 3);
+        for (const auto& result : results) {
+            if (db.read(result.second, buffer, &size)) {
+                printf("Range query result [ID=%u]: %s\n", 
+                       result.first, buffer);
             }
         }
 
