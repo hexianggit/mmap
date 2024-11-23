@@ -137,6 +137,46 @@ private:
 // 在类外定义静态成员变量
 const size_t BigFileProcessor::MAX_THREADS = 8;
 
+
+// 示例3：文件搜索
+void search_in_file(const char* filename, const char* pattern) {
+    BigFileProcessor processor(filename);
+    std::mutex print_mutex;
+    std::atomic<size_t> match_count{0};
+    
+    processor.process_parallel([&](char* data, size_t size) {
+        std::string chunk(data, size);
+        size_t pos = 0;
+        while ((pos = chunk.find(pattern, pos)) != std::string::npos) {
+            match_count++;
+            std::lock_guard<std::mutex> lock(print_mutex);
+            printf("Found match at position: %zu\n", pos);
+            pos++;
+        }
+    });
+    
+    printf("Total matches found: %zu\n", match_count.load());
+}
+
+// 示例4：文件压缩
+void compress_file(const char* filename) {
+    BigFileProcessor processor(filename);
+    std::vector<std::vector<char>> compressed_chunks;
+    std::mutex chunks_mutex;
+    
+    processor.process_parallel([&](char* data, size_t size) {
+        // 压缩数据块
+        std::vector<char> compressed = compress_data(data, size);
+        
+        // 保存压缩后的数据
+        std::lock_guard<std::mutex> lock(chunks_mutex);
+        compressed_chunks.push_back(std::move(compressed));
+    });
+    
+    // 合并压缩后的数据
+    write_compressed_file(filename, compressed_chunks);
+}
+
 int main() {
     try {
         const char* filename = "bigfile.dat";
